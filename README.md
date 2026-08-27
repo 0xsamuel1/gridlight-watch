@@ -54,12 +54,12 @@ to a local chain or testnet, insert the deployed contract address, and set:
 
 ```sh
 VITE_USE_BLOCKCHAIN=true
-VITE_GRIDWITNESS_CONTRACT_ADDRESS=0x...
-VITE_GRIDWITNESS_CHAIN_ID=31337
-VITE_GRIDWITNESS_CHAIN_NAME=GridWitness Local
-VITE_GRIDWITNESS_RPC_URL=http://127.0.0.1:8545
-VITE_GRIDWITNESS_NATIVE_CURRENCY_NAME=Ether
-VITE_GRIDWITNESS_NATIVE_CURRENCY_SYMBOL=ETH
+VITE_GRIDWITNESS_CONTRACT_ADDRESS=0xcda7Ed6C456bE32F13CbD6100FA49C83a5e5Ec2d
+VITE_GRIDWITNESS_CHAIN_ID=133
+VITE_GRIDWITNESS_CHAIN_NAME=HSKChain Testnet
+VITE_GRIDWITNESS_RPC_URL=https://testnet.hsk.xyz
+VITE_GRIDWITNESS_NATIVE_CURRENCY_NAME=HSK
+VITE_GRIDWITNESS_NATIVE_CURRENCY_SYMBOL=HSK
 ```
 
 Never put a private key in frontend `VITE_*` variables. `DEPLOYER_PRIVATE_KEY` is only for Hardhat
@@ -111,6 +111,15 @@ Run a local simulated deployment:
 
 ```sh
 npm run contracts:deploy
+```
+
+Current HSKChain Testnet deployment:
+
+```sh
+GridWitness=0xcda7Ed6C456bE32F13CbD6100FA49C83a5e5Ec2d
+RPC=https://testnet.hsk.xyz
+ChainID=133
+Explorer=https://testnet-explorer.hsk.xyz
 ```
 
 For a future testnet deployment, copy `.env.example` to `.env`, set `HSK_RPC_URL` and
