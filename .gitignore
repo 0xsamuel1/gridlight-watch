@@ -18,6 +18,7 @@ cache
 .tanstack/**
 .nitro
 .netlify
+.vercel
 *.local
 
 # Wrangler / Cloudflare
