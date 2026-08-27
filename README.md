@@ -6,7 +6,7 @@ Lagos map, and accurate meters receive demo GRID reward points.
 
 The frontend runs in mock/localStorage mode by default and can also connect to the GridWitness
 Solidity contract through Wagmi and Viem when blockchain mode is enabled. There is no backend,
-database, AI API, or mainnet deployment.
+database, or AI API.
 
 ## Stack
 
@@ -133,10 +133,26 @@ For a future testnet deployment, copy `.env.example` to `.env`, set `HSK_RPC_URL
 npm run contracts:deploy -- --network hskTestnet
 ```
 
-After any future testnet deployment, copy the printed contract address into
-`VITE_CONTRACT_ADDRESS`, set the matching `VITE_CHAIN_ID` and `VITE_RPC_URL` values, and restart the
-frontend with `VITE_USE_BLOCKCHAIN=true`. Do not deploy this hackathon contract to mainnet until it
-has been reviewed and audited.
+HSKChain Mainnet configuration:
+
+```sh
+RPC=https://mainnet.hsk.xyz
+ChainID=177
+Explorer=https://hashkey.blockscout.com
+NativeToken=HSK
+```
+
+Only deploy to mainnet from a local, funded deployer wallet that has not been shared in chat or
+committed anywhere. Set `HSK_MAINNET_RPC_URL`, `DEPLOYER_PRIVATE_KEY`, and the explicit confirmation
+guard, then run:
+
+```sh
+CONFIRM_MAINNET_DEPLOY=GRIDWITNESS_MAINNET npm run contracts:deploy -- --network hskMainnet
+```
+
+After any deployment, copy the printed contract address into `VITE_CONTRACT_ADDRESS`, set the
+matching `VITE_CHAIN_ID` and `VITE_RPC_URL` values, and rebuild/redeploy the frontend with
+`VITE_USE_BLOCKCHAIN=true`.
 
 ## Contract Model
 

@@ -34,5 +34,11 @@ export default defineConfig({
       url: process.env.HSK_RPC_URL ?? "http://127.0.0.1:8545",
       accounts: hskAccounts,
     },
+    hskMainnet: {
+      type: "http",
+      chainType: "l1",
+      url: process.env.HSK_MAINNET_RPC_URL ?? "https://mainnet.hsk.xyz",
+      accounts: hskAccounts,
+    },
   },
 });
