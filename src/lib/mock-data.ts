@@ -547,7 +547,13 @@ export const trustHistory = [
 
 export const leaderboard = [
   { owner: "Adaeze N.", meter: "GW-IK-014", location: "Ikeja GRA", accurate: 1578, rewards: 2480 },
-  { owner: "Ibrahim K.", meter: "GW-LK-022", location: "Lekki Phase 1", accurate: 1397, rewards: 2205 },
+  {
+    owner: "Ibrahim K.",
+    meter: "GW-LK-022",
+    location: "Lekki Phase 1",
+    accurate: 1397,
+    rewards: 2205,
+  },
   { owner: "Samuel M.", meter: "GW-YB-001", location: "Yaba", accurate: 1245, rewards: 2140 },
   { owner: "Femi B.", meter: "GW-SU-007", location: "Surulere", accurate: 1214, rewards: 1990 },
   { owner: "Chidinma O.", meter: "GW-YB-002", location: "Yaba", accurate: 1035, rewards: 1875 },

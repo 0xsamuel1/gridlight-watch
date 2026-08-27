@@ -221,9 +221,7 @@ export function GridProvider({ children }: { children: ReactNode }) {
 
   const runConsensus = useCallback(
     (location: string) => {
-      const relevant = baseMeters
-        .filter((m) => m.location === location)
-        .map((m) => m.id);
+      const relevant = baseMeters.filter((m) => m.location === location).map((m) => m.id);
       let consensus = 0;
       let verified = false;
       const outageId = `OUT-${2300 + Math.floor(Math.random() * 90)}`;
@@ -271,7 +269,10 @@ export function GridProvider({ children }: { children: ReactNode }) {
 
         return {
           ...s,
-          outages: [outage, ...s.outages.filter((o) => !(o.area === location && o.status !== "restored"))],
+          outages: [
+            outage,
+            ...s.outages.filter((o) => !(o.area === location && o.status !== "restored")),
+          ],
           neighbourhoods: s.neighbourhoods.map((n) =>
             n.name === location
               ? {
@@ -288,9 +289,7 @@ export function GridProvider({ children }: { children: ReactNode }) {
           ),
           meters: s.meters.map((m) => {
             if (!rewarded.includes(m.id)) {
-              return relevant.includes(m.id)
-                ? { ...m, trust: Math.max(40, m.trust - 3) }
-                : m;
+              return relevant.includes(m.id) ? { ...m, trust: Math.max(40, m.trust - 3) } : m;
             }
             return {
               ...m,

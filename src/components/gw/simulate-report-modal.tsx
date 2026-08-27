@@ -68,10 +68,7 @@ export function SimulateReportModal({
   onOpenChange: (open: boolean) => void;
 }) {
   const { submitReport, runConsensus } = useGrid();
-  const featured = useMemo(
-    () => allMeters.filter((m) => featuredMeterIds.includes(m.id)),
-    [],
-  );
+  const featured = useMemo(() => allMeters.filter((m) => featuredMeterIds.includes(m.id)), []);
 
   const [meterId, setMeterId] = useState(featured[0]?.id ?? "GW-YB-001");
   const [location, setLocation] = useState("Yaba");
@@ -112,7 +109,9 @@ export function SimulateReportModal({
     toast.success("Report signed and submitted", {
       description: `${allMeters.find((m) => m.id === meterId)?.name} • Power ${status === "off" ? "OFF" : "ON"} • ${location}`,
     });
-    const next = featured.find((m) => m.id !== meterId && !submitted.some((s) => s.meterId === m.id));
+    const next = featured.find(
+      (m) => m.id !== meterId && !submitted.some((s) => s.meterId === m.id),
+    );
     if (next) {
       setMeterId(next.id);
       setStatus(next.id === "GW-YB-003" ? "on" : "off");
@@ -133,27 +132,30 @@ export function SimulateReportModal({
   function analyze() {
     setPhase("analyzing");
     setActiveStep(0);
-    const timers = ANALYSIS_STEPS.map((_, i) =>
-      setTimeout(() => setActiveStep(i), i * 750),
+    const timers = ANALYSIS_STEPS.map((_, i) => setTimeout(() => setActiveStep(i), i * 750));
+    setTimeout(
+      () => {
+        timers.forEach(clearTimeout);
+        const outcome = runConsensus(location);
+        setResult({
+          consensus: outcome.consensus,
+          verified: outcome.verified,
+          hash: outcome.hash,
+          rewarded: outcome.rewarded.length,
+          outageId: outcome.outageId,
+        });
+        setPhase("result");
+        toast.success(
+          outcome.verified
+            ? `${outcome.consensus}% consensus reached — ${location} marked as a verified outage`
+            : `${outcome.consensus}% consensus — not enough agreement to verify an outage`,
+          {
+            description: `${outcome.rewarded.length * 25} GRID demo points issued to accurate meters`,
+          },
+        );
+      },
+      ANALYSIS_STEPS.length * 750 + 400,
     );
-    setTimeout(() => {
-      timers.forEach(clearTimeout);
-      const outcome = runConsensus(location);
-      setResult({
-        consensus: outcome.consensus,
-        verified: outcome.verified,
-        hash: outcome.hash,
-        rewarded: outcome.rewarded.length,
-        outageId: outcome.outageId,
-      });
-      setPhase("result");
-      toast.success(
-        outcome.verified
-          ? `${outcome.consensus}% consensus reached — ${location} marked as a verified outage`
-          : `${outcome.consensus}% consensus — not enough agreement to verify an outage`,
-        { description: `${outcome.rewarded.length * 25} GRID demo points issued to accurate meters` },
-      );
-    }, ANALYSIS_STEPS.length * 750 + 400);
   }
 
   return (

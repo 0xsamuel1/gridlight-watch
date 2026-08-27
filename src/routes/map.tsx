@@ -11,6 +11,125 @@ import type { PowerState } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/map")({ component: MapRoute });
-const filters: {label:string; value:"all"|PowerState}[] = [{label:"All areas",value:"all"},{label:"Power available",value:"on"},{label:"Active outages",value:"outage"},{label:"Conflicting",value:"conflict"},{label:"Predicted",value:"predicted"}];
-function MapRoute(){return <AppShell><MapPage/></AppShell>}
-function MapPage(){const {neighbourhoods}=useGrid(); const [filter,setFilter]=useState<"all"|PowerState>("all"); const visible=useMemo(()=>filter==="all"?neighbourhoods:neighbourhoods.filter(n=>n.state===filter),[filter,neighbourhoods]); const [id,setId]=useState("yaba"); const selected=neighbourhoods.find(n=>n.id===id) ?? neighbourhoods[0]; return <><PageHeader eyebrow="Live network" title="Lagos outage map" description="Community-verified electricity status across monitored neighbourhoods."/><div className="mb-4 flex flex-wrap gap-2">{filters.map(f=><Button key={f.value} size="sm" variant={filter===f.value?"default":"outline"} onClick={()=>setFilter(f.value)}>{f.label}</Button>)}</div><div className="grid gap-5 xl:grid-cols-[1fr_360px]"><div className="surface-card p-3"><LagosMap areas={visible} selectedId={id} onSelect={n=>setId(n.id)} zoom={12} className="h-[620px]"/><MapLegend className="p-3 pb-1"/></div><aside className="surface-card h-fit p-5"><div className="flex items-start justify-between gap-3"><div><p className="text-xs text-muted-foreground">Selected neighbourhood</p><h2 className="mt-1 text-2xl font-bold">{selected.name}</h2><p className="text-sm text-muted-foreground">{selected.lga} LGA</p></div><StatusBadge state={selected.state} size="sm"/></div><div className="my-5 h-px bg-border"/><dl className="grid grid-cols-2 gap-4 text-sm"><div><dt className="text-xs text-muted-foreground">Reporting meters</dt><dd className="mt-1 flex items-center gap-1 font-semibold"><RadioTower className="h-4 w-4 text-info"/>{selected.meters}</dd></div><div><dt className="text-xs text-muted-foreground">Consensus</dt><dd className="mt-1 font-semibold">{selected.consensus}%</dd></div><div><dt className="text-xs text-muted-foreground">Reliability</dt><dd className="mt-1 font-semibold">{selected.reliability || "—"}%</dd></div><div><dt className="text-xs text-muted-foreground">Latest block</dt><dd className="mt-1 font-semibold">#{selected.lastBlock}</dd></div></dl>{selected.outageStart&&<div className="mt-5 rounded-xl bg-danger/8 p-4"><p className="flex items-center gap-2 text-sm font-semibold text-danger"><Clock className="h-4 w-4"/>Outage started {selected.outageStart}</p><p className="mt-2 text-xs text-muted-foreground">AI estimate: {selected.predictedRestoration}</p></div>}<div className="mt-5"><p className="mb-2 flex items-center gap-2 text-xs font-semibold text-muted-foreground"><ShieldCheck className="h-4 w-4"/>Latest verification</p><CopyHash hash={selected.txHash}/></div><div className="mt-5 space-y-2">{neighbourhoods.map(n=><button key={n.id} onClick={()=>setId(n.id)} className={cn("flex w-full items-center justify-between rounded-xl border p-3 text-left",id===n.id&&"border-primary bg-primary/5")}><span className="text-sm font-semibold">{n.name}</span><StatusBadge state={n.state} size="sm"/></button>)}</div></aside></div></>}
+const filters: { label: string; value: "all" | PowerState }[] = [
+  { label: "All areas", value: "all" },
+  { label: "Power available", value: "on" },
+  { label: "Active outages", value: "outage" },
+  { label: "Conflicting", value: "conflict" },
+  { label: "Predicted", value: "predicted" },
+];
+function MapRoute() {
+  return (
+    <AppShell>
+      <MapPage />
+    </AppShell>
+  );
+}
+function MapPage() {
+  const { neighbourhoods } = useGrid();
+  const [filter, setFilter] = useState<"all" | PowerState>("all");
+  const visible = useMemo(
+    () => (filter === "all" ? neighbourhoods : neighbourhoods.filter((n) => n.state === filter)),
+    [filter, neighbourhoods],
+  );
+  const [id, setId] = useState("yaba");
+  const selected = neighbourhoods.find((n) => n.id === id) ?? neighbourhoods[0];
+  return (
+    <>
+      <PageHeader
+        eyebrow="Live network"
+        title="Lagos outage map"
+        description="Community-verified electricity status across monitored neighbourhoods."
+      />
+      <div className="mb-4 flex flex-wrap gap-2">
+        {filters.map((f) => (
+          <Button
+            key={f.value}
+            size="sm"
+            variant={filter === f.value ? "default" : "outline"}
+            onClick={() => setFilter(f.value)}
+          >
+            {f.label}
+          </Button>
+        ))}
+      </div>
+      <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
+        <div className="surface-card p-3">
+          <LagosMap
+            areas={visible}
+            selectedId={id}
+            onSelect={(n) => setId(n.id)}
+            zoom={12}
+            className="h-[620px]"
+          />
+          <MapLegend className="p-3 pb-1" />
+        </div>
+        <aside className="surface-card h-fit p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs text-muted-foreground">Selected neighbourhood</p>
+              <h2 className="mt-1 text-2xl font-bold">{selected.name}</h2>
+              <p className="text-sm text-muted-foreground">{selected.lga} LGA</p>
+            </div>
+            <StatusBadge state={selected.state} size="sm" />
+          </div>
+          <div className="my-5 h-px bg-border" />
+          <dl className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <dt className="text-xs text-muted-foreground">Reporting meters</dt>
+              <dd className="mt-1 flex items-center gap-1 font-semibold">
+                <RadioTower className="h-4 w-4 text-info" />
+                {selected.meters}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs text-muted-foreground">Consensus</dt>
+              <dd className="mt-1 font-semibold">{selected.consensus}%</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-muted-foreground">Reliability</dt>
+              <dd className="mt-1 font-semibold">{selected.reliability || "—"}%</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-muted-foreground">Latest block</dt>
+              <dd className="mt-1 font-semibold">#{selected.lastBlock}</dd>
+            </div>
+          </dl>
+          {selected.outageStart && (
+            <div className="mt-5 rounded-xl bg-danger/8 p-4">
+              <p className="flex items-center gap-2 text-sm font-semibold text-danger">
+                <Clock className="h-4 w-4" />
+                Outage started {selected.outageStart}
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                AI estimate: {selected.predictedRestoration}
+              </p>
+            </div>
+          )}
+          <div className="mt-5">
+            <p className="mb-2 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+              <ShieldCheck className="h-4 w-4" />
+              Latest verification
+            </p>
+            <CopyHash hash={selected.txHash} />
+          </div>
+          <div className="mt-5 space-y-2">
+            {neighbourhoods.map((n) => (
+              <button
+                key={n.id}
+                onClick={() => setId(n.id)}
+                className={cn(
+                  "flex w-full items-center justify-between rounded-xl border p-3 text-left",
+                  id === n.id && "border-primary bg-primary/5",
+                )}
+              >
+                <span className="text-sm font-semibold">{n.name}</span>
+                <StatusBadge state={n.state} size="sm" />
+              </button>
+            ))}
+          </div>
+        </aside>
+      </div>
+    </>
+  );
+}
