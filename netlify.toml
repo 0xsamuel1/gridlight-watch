@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  VITE_USE_BLOCKCHAIN = "true"
+  VITE_CONTRACT_ADDRESS = "0xcda7Ed6C456bE32F13CbD6100FA49C83a5e5Ec2d"
+  VITE_CHAIN_ID = "133"
+  VITE_RPC_URL = "https://testnet.hsk.xyz"
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/server"
+  status = 200

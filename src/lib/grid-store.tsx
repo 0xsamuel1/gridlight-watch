@@ -549,17 +549,23 @@ function BlockchainGridProvider({ children }: { children: ReactNode }) {
         await ensureReady();
         setPendingAction(label);
         setTxStatus("pending");
-        setTxMessage("Waiting for wallet confirmation");
+        setTxMessage("Waiting for wallet");
         const hash = await action();
         setTxMessage("Transaction submitted");
+        await new Promise((resolve) => globalThis.setTimeout(resolve, 250));
+        setTxMessage("Confirming");
         const receipt = await publicClient!.waitForTransactionReceipt({ hash });
         if (receipt.status !== "success") throw new Error("Transaction failed on-chain");
         setTxStatus("success");
-        setTxMessage("Transaction confirmed");
+        setTxMessage("Confirmed");
         return receipt;
       } catch (error) {
         setTxStatus(isRejected(error) ? "rejected" : "failed");
-        setTxMessage(error instanceof Error ? error.message : String(error));
+        setTxMessage(
+          `${isRejected(error) ? "Rejected" : "Failed"}: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
         throw error;
       } finally {
         setPendingAction(undefined);
@@ -685,14 +691,18 @@ function BlockchainGridProvider({ children }: { children: ReactNode }) {
     const connector = connectors[0];
     if (!connector) throw new Error("No browser wallet connector found");
     setTxStatus("pending");
-    setTxMessage("Opening wallet");
+    setTxMessage("Waiting for wallet");
     try {
       await connectAsync({ connector, chainId: gridWitnessChain.id });
       setTxStatus("success");
-      setTxMessage("Wallet connected");
+      setTxMessage("Confirmed");
     } catch (error) {
       setTxStatus(isRejected(error) ? "rejected" : "failed");
-      setTxMessage(error instanceof Error ? error.message : String(error));
+      setTxMessage(
+        `${isRejected(error) ? "Rejected" : "Failed"}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
       throw error;
     }
   }, [connectAsync, connectors]);

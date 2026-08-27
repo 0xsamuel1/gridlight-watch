@@ -54,13 +54,16 @@ to a local chain or testnet, insert the deployed contract address, and set:
 
 ```sh
 VITE_USE_BLOCKCHAIN=true
-VITE_GRIDWITNESS_CONTRACT_ADDRESS=0xcda7Ed6C456bE32F13CbD6100FA49C83a5e5Ec2d
-VITE_GRIDWITNESS_CHAIN_ID=133
+VITE_CONTRACT_ADDRESS=0xcda7Ed6C456bE32F13CbD6100FA49C83a5e5Ec2d
+VITE_CHAIN_ID=133
+VITE_RPC_URL=https://testnet.hsk.xyz
 VITE_GRIDWITNESS_CHAIN_NAME=HSKChain Testnet
-VITE_GRIDWITNESS_RPC_URL=https://testnet.hsk.xyz
 VITE_GRIDWITNESS_NATIVE_CURRENCY_NAME=HSK
 VITE_GRIDWITNESS_NATIVE_CURRENCY_SYMBOL=HSK
 ```
+
+The frontend also still accepts the older aliases `VITE_GRIDWITNESS_CONTRACT_ADDRESS`,
+`VITE_GRIDWITNESS_CHAIN_ID`, and `VITE_GRIDWITNESS_RPC_URL`.
 
 Never put a private key in frontend `VITE_*` variables. `DEPLOYER_PRIVATE_KEY` is only for Hardhat
 deployment scripts.
@@ -71,7 +74,8 @@ deployment scripts.
 npm run build
 ```
 
-The production build outputs to `.output/`.
+The default production build outputs to `.output/`. On Netlify, `NETLIFY=true` selects Nitro's
+Netlify preset and writes public assets to `dist/`.
 
 ## Lint
 
@@ -129,10 +133,10 @@ For a future testnet deployment, copy `.env.example` to `.env`, set `HSK_RPC_URL
 npm run contracts:deploy -- --network hskTestnet
 ```
 
-After deployment, copy the printed contract address into
-`VITE_GRIDWITNESS_CONTRACT_ADDRESS`, set the matching `VITE_GRIDWITNESS_*` chain variables, and
-restart the frontend with `VITE_USE_BLOCKCHAIN=true`. Do not deploy this hackathon contract to
-mainnet until it has been reviewed and audited.
+After any future testnet deployment, copy the printed contract address into
+`VITE_CONTRACT_ADDRESS`, set the matching `VITE_CHAIN_ID` and `VITE_RPC_URL` values, and restart the
+frontend with `VITE_USE_BLOCKCHAIN=true`. Do not deploy this hackathon contract to mainnet until it
+has been reviewed and audited.
 
 ## Contract Model
 
@@ -147,7 +151,7 @@ meters that matched the majority, and records a verified outage if Power OFF is 
 When `VITE_USE_BLOCKCHAIN=true`, the app:
 
 - connects to an injected browser wallet through Wagmi
-- detects the active chain and requests a switch to `VITE_GRIDWITNESS_CHAIN_ID`
+- detects the active chain and requests a switch to `VITE_CHAIN_ID`
 - reads demo meter IDs from the contract with `getMeter`
 - submits `registerMeter`, `submitReport`, and `finalizeRound` transactions
 - waits for receipts and displays real transaction hashes in blockchain activity
@@ -157,6 +161,28 @@ When `VITE_USE_BLOCKCHAIN=true`, the app:
 
 The current contract exposes per-meter reads, so the frontend checks the known demo meter IDs until
 a later indexer or contract registry list is added.
+
+## Netlify Deployment
+
+`netlify.toml` is configured for the hackathon testnet app:
+
+- build command: `npm run build`
+- publish directory: `dist`
+- route fallback: all routes are sent to the Nitro server function
+
+Set these Netlify environment variables:
+
+```sh
+VITE_USE_BLOCKCHAIN=true
+VITE_CONTRACT_ADDRESS=0xcda7Ed6C456bE32F13CbD6100FA49C83a5e5Ec2d
+VITE_CHAIN_ID=133
+VITE_RPC_URL=https://testnet.hsk.xyz
+VITE_GRIDWITNESS_CHAIN_NAME=HSKChain Testnet
+VITE_GRIDWITNESS_NATIVE_CURRENCY_NAME=HSK
+VITE_GRIDWITNESS_NATIVE_CURRENCY_SYMBOL=HSK
+```
+
+Do not add `DEPLOYER_PRIVATE_KEY` or any private key to frontend hosting environment variables.
 
 ## Routes
 

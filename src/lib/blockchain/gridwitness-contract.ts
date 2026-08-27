@@ -3,9 +3,16 @@ import { injected } from "wagmi/connectors";
 import { defineChain, zeroAddress, type Address } from "viem";
 
 const useBlockchainValue = import.meta.env.VITE_USE_BLOCKCHAIN ?? "false";
-const chainIdValue = import.meta.env.VITE_GRIDWITNESS_CHAIN_ID ?? "31337";
-const contractAddressValue = import.meta.env.VITE_GRIDWITNESS_CONTRACT_ADDRESS ?? "";
-const rpcUrlValue = import.meta.env.VITE_GRIDWITNESS_RPC_URL ?? "http://127.0.0.1:8545";
+const chainIdValue =
+  import.meta.env.VITE_CHAIN_ID ?? import.meta.env.VITE_GRIDWITNESS_CHAIN_ID ?? "133";
+const contractAddressValue =
+  import.meta.env.VITE_CONTRACT_ADDRESS ??
+  import.meta.env.VITE_GRIDWITNESS_CONTRACT_ADDRESS ??
+  "0xcda7Ed6C456bE32F13CbD6100FA49C83a5e5Ec2d";
+const rpcUrlValue =
+  import.meta.env.VITE_RPC_URL ??
+  import.meta.env.VITE_GRIDWITNESS_RPC_URL ??
+  "https://testnet.hsk.xyz";
 
 export const blockchainEnabled = useBlockchainValue === "true";
 export const gridWitnessChainId = Number(chainIdValue);
@@ -18,10 +25,10 @@ export const gridWitnessContractConfigured = gridWitnessContractAddress !== zero
 
 export const gridWitnessChain = defineChain({
   id: gridWitnessChainId,
-  name: import.meta.env.VITE_GRIDWITNESS_CHAIN_NAME ?? "GridWitness Local",
+  name: import.meta.env.VITE_GRIDWITNESS_CHAIN_NAME ?? "HSKChain Testnet",
   nativeCurrency: {
-    name: import.meta.env.VITE_GRIDWITNESS_NATIVE_CURRENCY_NAME ?? "Ether",
-    symbol: import.meta.env.VITE_GRIDWITNESS_NATIVE_CURRENCY_SYMBOL ?? "ETH",
+    name: import.meta.env.VITE_GRIDWITNESS_NATIVE_CURRENCY_NAME ?? "HSK",
+    symbol: import.meta.env.VITE_GRIDWITNESS_NATIVE_CURRENCY_SYMBOL ?? "HSK",
     decimals: 18,
   },
   rpcUrls: {
