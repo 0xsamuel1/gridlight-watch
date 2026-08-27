@@ -10,33 +10,127 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as MapRouteImport } from './routes/map'
+import { Route as MetersRouteImport } from './routes/meters'
+import { Route as OutagesRouteImport } from './routes/outages'
+import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as OutagesOutageIdRouteImport } from './routes/outages.$outageId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightsRoute = InsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapRoute = MapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MetersRoute = MetersRouteImport.update({
+  id: '/meters',
+  path: '/meters',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutagesRoute = OutagesRouteImport.update({
+  id: '/outages',
+  path: '/outages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RewardsRoute = RewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutagesOutageIdRoute = OutagesOutageIdRouteImport.update({
+  id: '/$outageId',
+  path: '/$outageId',
+  getParentRoute: () => OutagesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/insights': typeof InsightsRoute
+  '/map': typeof MapRoute
+  '/meters': typeof MetersRoute
+  '/outages': typeof OutagesRouteWithChildren
+  '/rewards': typeof RewardsRoute
+  '/outages/$outageId': typeof OutagesOutageIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/insights': typeof InsightsRoute
+  '/map': typeof MapRoute
+  '/meters': typeof MetersRoute
+  '/outages': typeof OutagesRouteWithChildren
+  '/rewards': typeof RewardsRoute
+  '/outages/$outageId': typeof OutagesOutageIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/insights': typeof InsightsRoute
+  '/map': typeof MapRoute
+  '/meters': typeof MetersRoute
+  '/outages': typeof OutagesRouteWithChildren
+  '/rewards': typeof RewardsRoute
+  '/outages/$outageId': typeof OutagesOutageIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/insights'
+    | '/map'
+    | '/meters'
+    | '/outages'
+    | '/rewards'
+    | '/outages/$outageId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/insights'
+    | '/map'
+    | '/meters'
+    | '/outages'
+    | '/rewards'
+    | '/outages/$outageId'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/insights'
+    | '/map'
+    | '/meters'
+    | '/outages'
+    | '/rewards'
+    | '/outages/$outageId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
+  InsightsRoute: typeof InsightsRoute
+  MapRoute: typeof MapRoute
+  MetersRoute: typeof MetersRoute
+  OutagesRoute: typeof OutagesRouteWithChildren
+  RewardsRoute: typeof RewardsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +142,77 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insights': {
+      id: '/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meters': {
+      id: '/meters'
+      path: '/meters'
+      fullPath: '/meters'
+      preLoaderRoute: typeof MetersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outages': {
+      id: '/outages'
+      path: '/outages'
+      fullPath: '/outages'
+      preLoaderRoute: typeof OutagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rewards': {
+      id: '/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outages/$outageId': {
+      id: '/outages/$outageId'
+      path: '/$outageId'
+      fullPath: '/outages/$outageId'
+      preLoaderRoute: typeof OutagesOutageIdRouteImport
+      parentRoute: typeof OutagesRoute
+    }
   }
 }
 
+interface OutagesRouteChildren {
+  OutagesOutageIdRoute: typeof OutagesOutageIdRoute
+}
+
+const OutagesRouteChildren: OutagesRouteChildren = {
+  OutagesOutageIdRoute: OutagesOutageIdRoute,
+}
+
+const OutagesRouteWithChildren =
+  OutagesRoute._addFileChildren(OutagesRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
+  InsightsRoute: InsightsRoute,
+  MapRoute: MapRoute,
+  MetersRoute: MetersRoute,
+  OutagesRoute: OutagesRouteWithChildren,
+  RewardsRoute: RewardsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

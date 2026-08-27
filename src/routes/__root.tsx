@@ -79,10 +79,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "GridWitness — Decentralized Energy Intelligence" },
-      { name: "description", content: "Community-verified electricity outage intelligence for Nigeria." },
+      {
+        name: "description",
+        content: "Community-verified electricity outage intelligence for Nigeria.",
+      },
       { name: "author", content: "GridWitness" },
       { property: "og:title", content: "GridWitness" },
-      { property: "og:description", content: "Know when the power goes out—and when it may return." },
+      {
+        property: "og:description",
+        content: "Know when the power goes out—and when it may return.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -121,7 +127,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      <Toaster richColors position="top-right" />
+      <Toaster richColors position="bottom-left" />
     </QueryClientProvider>
   );
 }

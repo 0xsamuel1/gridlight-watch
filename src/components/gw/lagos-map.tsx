@@ -1,4 +1,5 @@
 import { Suspense, lazy, useEffect, useState } from "react";
+import { createClientOnlyFn } from "@tanstack/react-start";
 
 import { MapSkeleton } from "@/components/gw/loading-skeleton";
 import type { Neighbourhood } from "@/lib/types";
@@ -6,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 // Leaflet touches `window` at import time, so the map module is only loaded
 // in the browser after hydration.
-const LagosMapClient = lazy(() => import("./lagos-map.client"));
+const LagosMapClient = lazy(createClientOnlyFn(() => import("./lagos-map.client")));
 
 export function LagosMap({
   areas,

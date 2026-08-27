@@ -75,7 +75,10 @@ export function MeterCard({
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <span className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
           <span
-            className={cn("h-2 w-2 shrink-0 rounded-full", meter.online ? "bg-success" : "bg-neutralstate")}
+            className={cn(
+              "h-2 w-2 shrink-0 rounded-full",
+              meter.online ? "bg-success" : "bg-neutralstate",
+            )}
             aria-hidden
           />
           {meter.online ? "Connected" : "Offline"}
