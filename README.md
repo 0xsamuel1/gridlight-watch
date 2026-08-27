@@ -1,11 +1,12 @@
 # GridWitness
 
-GridWitness is a frontend-only demo for decentralized electricity-outage monitoring in Nigeria.
-Simulated smart meters submit power reports, neighbourhood devices reach consensus, verified
-outages appear on a Lagos map, and accurate meters receive demo GRID reward points.
+GridWitness is a demo for decentralized electricity-outage monitoring in Nigeria. Simulated smart
+meters submit power reports, neighbourhood devices reach consensus, verified outages appear on a
+Lagos map, and accurate meters receive demo GRID reward points.
 
-This app currently uses mock data and localStorage only. It does not include a backend, database,
-real wallet, AI API, smart contract, or real blockchain transactions yet.
+The frontend currently uses mock data and localStorage only. The repo also includes a small
+hackathon-ready Solidity contract prototype, but it is not connected to the frontend yet. There is
+no backend, database, real wallet connection, AI API, or mainnet deployment.
 
 ## Stack
 
@@ -19,6 +20,8 @@ real wallet, AI API, smart contract, or real blockchain transactions yet.
 - Recharts
 - Motion
 - Sonner
+- Hardhat 3
+- Solidity 0.8.x
 
 ## Install
 
@@ -54,6 +57,54 @@ npm run lint
 
 The current lint setup may report fast-refresh warnings for files that export components plus
 shared helpers. These are warnings, not build blockers.
+
+## Smart Contract
+
+The contract lives at `contracts/GridWitness.sol`. It supports:
+
+- owner-managed smart meter registration
+- one signed report per registered meter per reporting round
+- neighbourhood-only rounds, so reports from different locations cannot be mixed
+- majority consensus calculation
+- outage verification when more than 50% of reports say `PowerStatus.Off`
+- verified outage records with location, start time, consensus percentage, and participating meters
+- demo GRID reward points for meters that match the majority result
+- events for meter registration, report submission, consensus, outage verification, and rewards
+
+Compile the contract:
+
+```sh
+npm run contracts:compile
+```
+
+Run the unit tests:
+
+```sh
+npm run contracts:test
+```
+
+Run a local simulated deployment:
+
+```sh
+npm run contracts:deploy
+```
+
+For a future testnet deployment, copy `.env.example` to `.env`, set `HSK_RPC_URL` and
+`DEPLOYER_PRIVATE_KEY`, then run:
+
+```sh
+npm run contracts:deploy -- --network hskTestnet
+```
+
+Do not deploy this hackathon contract to mainnet until it has been reviewed and audited.
+
+## Contract Model
+
+Each reporting round is identified by a `roundId`. The first meter report sets the round's
+neighbourhood location, and later reports must come from meters registered to the same location.
+When `finalizeRound(roundId)` is called, the contract compares Power OFF and Power ON reports,
+rounds the majority percentage to the nearest whole number, emits `ConsensusReached`, rewards the
+meters that matched the majority, and records a verified outage if Power OFF is above 50%.
 
 ## Routes
 
