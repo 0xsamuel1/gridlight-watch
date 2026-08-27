@@ -245,8 +245,3 @@ plugin during development/build.
     points are issued automatically by `finalizeRound`.
 12. Refresh the page and confirm the mock demo state persists from localStorage when
     `VITE_USE_BLOCKCHAIN=false`.
-
-## Lovable
-
-This project is connected to Lovable. Avoid rewriting published git history on connected branches:
-do not force push, rebase, amend, or squash commits that have already been pushed.
