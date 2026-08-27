@@ -126,6 +126,16 @@ ChainID=133
 Explorer=https://testnet-explorer.hsk.xyz
 ```
 
+Current HSKChain Mainnet deployment:
+
+```sh
+GridWitness=0xcda7Ed6C456bE32F13CbD6100FA49C83a5e5Ec2d
+RPC=https://mainnet.hsk.xyz
+ChainID=177
+Explorer=https://hashkey.blockscout.com
+DeployTx=0xaf1bec3871c7421ccc2d767bdee14e7afa46495f8e55ec21fd5358765b8dc540
+```
+
 For a future testnet deployment, copy `.env.example` to `.env`, set `HSK_RPC_URL` and
 `DEPLOYER_PRIVATE_KEY`, then run:
 
