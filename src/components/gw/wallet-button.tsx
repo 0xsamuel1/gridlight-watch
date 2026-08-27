@@ -20,17 +20,39 @@ import { shortHash } from "@/lib/mock-data";
  * `useDisconnect` and read the live chain id from HSK Chain.
  */
 export function WalletButton({ compact = false }: { compact?: boolean }) {
-  const { walletConnected, connectWallet, disconnectWallet, address, chainName } = useGrid();
+  const {
+    walletConnected,
+    connectWallet,
+    disconnectWallet,
+    switchNetwork,
+    address,
+    chainName,
+    blockchainEnabled,
+    contractConfigured,
+    isWrongNetwork,
+    txStatus,
+    txMessage,
+  } = useGrid();
   const [connecting, setConnecting] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  function handleConnect() {
+  async function handleConnect() {
     setConnecting(true);
-    setTimeout(() => {
-      connectWallet();
+    try {
+      await connectWallet();
+      toast.success(blockchainEnabled ? "Wallet connected" : "Wallet connected", {
+        description: `${shortHash(address)} on ${chainName}`,
+      });
+    } catch (error) {
+      toast.error(
+        txStatus === "rejected" ? "Wallet request rejected" : "Wallet connection failed",
+        {
+          description: error instanceof Error ? error.message : txMessage,
+        },
+      );
+    } finally {
       setConnecting(false);
-      toast.success("Wallet connected", { description: `${shortHash(address)} on ${chainName}` });
-    }, 700);
+    }
   }
 
   async function copyAddress() {
@@ -48,7 +70,28 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
     return (
       <Button onClick={handleConnect} disabled={connecting} size={compact ? "sm" : "default"}>
         <Wallet className="h-4 w-4" />
-        {connecting ? "Connecting…" : "Connect Wallet"}
+        {connecting ? "Connecting…" : blockchainEnabled ? "Connect Wallet" : "Connect Demo Wallet"}
+      </Button>
+    );
+  }
+
+  if (blockchainEnabled && isWrongNetwork) {
+    return (
+      <Button
+        variant="outline"
+        size={compact ? "sm" : "default"}
+        onClick={async () => {
+          try {
+            await switchNetwork();
+            toast.success(`Switched to ${chainName}`);
+          } catch (error) {
+            toast.error("Network switch failed", {
+              description: error instanceof Error ? error.message : undefined,
+            });
+          }
+        }}
+      >
+        Switch Network
       </Button>
     );
   }
@@ -69,6 +112,9 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
             <span className="h-2 w-2 rounded-full bg-success" aria-hidden />
             {chainName}
           </span>
+          {blockchainEnabled && !contractConfigured && (
+            <span className="block text-xs font-normal text-danger">Contract address missing</span>
+          )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={(e) => e.preventDefault()} onClick={copyAddress}>
@@ -77,7 +123,7 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => {
-            disconnectWallet();
+            void disconnectWallet();
             toast("Wallet disconnected");
           }}
         >

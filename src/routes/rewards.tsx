@@ -27,16 +27,31 @@ function Rewards() {
     claimRewards,
     meters,
     walletConnected,
+    blockchainEnabled,
+    txMessage,
   } = useGrid();
   const [confirm, setConfirm] = useState(false);
   const mine = meters.find((m) => m.id === "GW-YB-001")!;
-  function claim() {
+  async function claim() {
     if (!walletConnected) {
       toast.error("Connect your wallet before claiming rewards");
       return;
     }
-    const amount = claimRewards();
-    toast.success(`${amount} GRID demo points claimed`);
+    try {
+      const amount = await claimRewards();
+      toast.success(
+        blockchainEnabled
+          ? "On-chain rewards are issued automatically during consensus"
+          : `${amount} GRID demo points claimed`,
+        {
+          description: blockchainEnabled ? txMessage : undefined,
+        },
+      );
+    } catch (error) {
+      toast.error("Reward claim failed", {
+        description: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
   return (
     <>
@@ -51,8 +66,9 @@ function Rewards() {
         }
       />
       <div className="mb-5 rounded-xl border border-warning/30 bg-warning/8 p-3 text-xs text-warning-foreground">
-        <strong>Demo reward system:</strong> GRID is currently a demonstration point—not a
-        cryptocurrency or financial asset.
+        <strong>Demo reward system:</strong> GRID is currently a demonstration point, not a
+        cryptocurrency or financial asset. In blockchain mode, points are issued automatically when
+        consensus is finalized.
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
@@ -163,9 +179,13 @@ function Rewards() {
       <ConfirmModal
         open={confirm}
         onOpenChange={setConfirm}
-        title="Claim demo rewards?"
-        description={`This will simulate claiming ${availableRewards} GRID points to your connected wallet.`}
-        confirmLabel="Claim rewards"
+        title={blockchainEnabled ? "Review on-chain rewards?" : "Claim demo rewards?"}
+        description={
+          blockchainEnabled
+            ? "The contract issues reward points automatically during finalizeRound. This action only refreshes the reward state in the app."
+            : `This will simulate claiming ${availableRewards} GRID points to your connected wallet.`
+        }
+        confirmLabel={blockchainEnabled ? "Refresh rewards" : "Claim rewards"}
         onConfirm={claim}
       />
     </>

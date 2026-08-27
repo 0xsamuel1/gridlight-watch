@@ -69,6 +69,20 @@ describe("GridWitness", function () {
     assert.equal(stored.rewardPoints, 0n);
   });
 
+  it("prevents unauthorized and duplicate meter registration", async function () {
+    const { meterA, meterB, gridWitness } = await deployFixture();
+
+    await expectRevert(
+      gridWitness.connect(meterA).registerMeter("GW-YB-010", meterA.address, "Yaba"),
+      "Only owner",
+    );
+
+    await expectRevert(
+      gridWitness.registerMeter("GW-YB-001", meterB.address, "Yaba"),
+      "Meter already registered",
+    );
+  });
+
   it("allows each registered meter to report once per round", async function () {
     const { meterA, gridWitness } = await deployFixture();
 
@@ -148,6 +162,17 @@ describe("GridWitness", function () {
     assert.ok(emitted?.includes("ConsensusReached"));
     assert.ok(emitted?.includes("OutageVerified"));
     assert.ok(emitted?.includes("RewardIssued"));
+
+    await expectRevert(gridWitness.finalizeRound(10), "Round already finalized");
+
+    const meterAAfterReplay = await gridWitness.getMeter("GW-YB-001");
+    assert.equal(meterAAfterReplay.rewardPoints, 25n);
+  });
+
+  it("rejects finalizing empty rounds so rounds never get stuck silently", async function () {
+    const { gridWitness } = await deployFixture();
+
+    await expectRevert(gridWitness.finalizeRound(99), "No reports");
   });
 
   it("finalizes a power-on majority without verifying an outage", async function () {

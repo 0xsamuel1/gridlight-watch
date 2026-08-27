@@ -67,8 +67,11 @@ export function SimulateReportModal({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { submitReport, runConsensus } = useGrid();
+  const { submitReport, runConsensus, blockchainEnabled, pendingAction, txStatus, txMessage } =
+    useGrid();
   const featured = useMemo(() => allMeters.filter((m) => featuredMeterIds.includes(m.id)), []);
+  const submitting = pendingAction === "Submitting report";
+  const finalizing = pendingAction === "Finalizing consensus";
 
   const [meterId, setMeterId] = useState(featured[0]?.id ?? "GW-YB-001");
   const [location, setLocation] = useState("Yaba");
@@ -95,38 +98,62 @@ export function SimulateReportModal({
     setTime(defaultTime());
   }
 
-  function addReport(id: string, s: MeterStatus, t: string, loc: string) {
+  async function addReport(id: string, s: MeterStatus, t: string, loc: string) {
     const meter = allMeters.find((m) => m.id === id);
-    submitReport(id, loc, s, t);
+    await submitReport(id, loc, s, t);
     setSubmitted((prev) => [
       ...prev.filter((p) => p.meterId !== id),
       { meterId: id, name: meter?.name ?? id, status: s, time: t },
     ]);
   }
 
-  function handleSubmitOne() {
-    addReport(meterId, status, time, location);
-    toast.success("Report signed and submitted", {
-      description: `${allMeters.find((m) => m.id === meterId)?.name} • Power ${status === "off" ? "OFF" : "ON"} • ${location}`,
-    });
-    const next = featured.find(
-      (m) => m.id !== meterId && !submitted.some((s) => s.meterId === m.id),
-    );
-    if (next) {
-      setMeterId(next.id);
-      setStatus(next.id === "GW-YB-003" ? "on" : "off");
+  async function handleSubmitOne() {
+    try {
+      await addReport(meterId, status, time, location);
+      toast.success(
+        blockchainEnabled ? "Report transaction confirmed" : "Report signed and submitted",
+        {
+          description: `${allMeters.find((m) => m.id === meterId)?.name} • Power ${status === "off" ? "OFF" : "ON"} • ${location}`,
+        },
+      );
+      const next = featured.find(
+        (m) => m.id !== meterId && !submitted.some((s) => s.meterId === m.id),
+      );
+      if (next) {
+        setMeterId(next.id);
+        setStatus(next.id === "GW-YB-003" ? "on" : "off");
+      }
+    } catch (error) {
+      toast.error(
+        txStatus === "rejected" ? "Report rejected in wallet" : "Report submission failed",
+        {
+          description: error instanceof Error ? error.message : String(error),
+        },
+      );
     }
   }
 
-  function runDefaultScenario() {
+  async function runDefaultScenario() {
     const t = defaultTime();
-    addReport("GW-YB-001", "off", t, "Yaba");
-    addReport("GW-YB-002", "off", t, "Yaba");
-    addReport("GW-YB-003", "on", t, "Yaba");
-    setLocation("Yaba");
-    toast.success("Default scenario submitted", {
-      description: "Meter A: OFF · Meter B: OFF · Meter C: ON",
-    });
+    try {
+      await addReport("GW-YB-001", "off", t, "Yaba");
+      await addReport("GW-YB-002", "off", t, "Yaba");
+      await addReport("GW-YB-003", "on", t, "Yaba");
+      setLocation("Yaba");
+      toast.success(
+        blockchainEnabled ? "Default scenario confirmed on-chain" : "Default scenario submitted",
+        {
+          description: "Meter A: OFF · Meter B: OFF · Meter C: ON",
+        },
+      );
+    } catch (error) {
+      toast.error(
+        txStatus === "rejected" ? "Scenario rejected in wallet" : "Default scenario failed",
+        {
+          description: error instanceof Error ? error.message : String(error),
+        },
+      );
+    }
   }
 
   function analyze() {
@@ -134,25 +161,35 @@ export function SimulateReportModal({
     setActiveStep(0);
     const timers = ANALYSIS_STEPS.map((_, i) => setTimeout(() => setActiveStep(i), i * 750));
     setTimeout(
-      () => {
+      async () => {
         timers.forEach(clearTimeout);
-        const outcome = runConsensus(location);
-        setResult({
-          consensus: outcome.consensus,
-          verified: outcome.verified,
-          hash: outcome.hash,
-          rewarded: outcome.rewarded.length,
-          outageId: outcome.outageId,
-        });
-        setPhase("result");
-        toast.success(
-          outcome.verified
-            ? `${outcome.consensus}% consensus reached — ${location} marked as a verified outage`
-            : `${outcome.consensus}% consensus — not enough agreement to verify an outage`,
-          {
-            description: `${outcome.rewarded.length * 25} GRID demo points issued to accurate meters`,
-          },
-        );
+        try {
+          const outcome = await runConsensus(location);
+          setResult({
+            consensus: outcome.consensus,
+            verified: outcome.verified,
+            hash: outcome.hash,
+            rewarded: outcome.rewarded.length,
+            outageId: outcome.outageId,
+          });
+          setPhase("result");
+          toast.success(
+            outcome.verified
+              ? `${outcome.consensus}% consensus reached — ${location} marked as a verified outage`
+              : `${outcome.consensus}% consensus — not enough agreement to verify an outage`,
+            {
+              description: `${outcome.rewarded.length * 25} GRID demo points issued to accurate meters`,
+            },
+          );
+        } catch (error) {
+          setPhase("form");
+          toast.error(
+            txStatus === "rejected" ? "Consensus transaction rejected" : "Consensus failed",
+            {
+              description: error instanceof Error ? error.message : String(error),
+            },
+          );
+        }
       },
       ANALYSIS_STEPS.length * 750 + 400,
     );
@@ -287,19 +324,40 @@ export function SimulateReportModal({
               </div>
 
               <DialogFooter className="gap-2 sm:justify-between">
-                <Button type="button" variant="soft" onClick={runDefaultScenario}>
-                  Use default scenario
+                <Button
+                  type="button"
+                  variant="soft"
+                  onClick={runDefaultScenario}
+                  disabled={submitting}
+                >
+                  {submitting ? "Submitting..." : "Use default scenario"}
                 </Button>
                 <div className="flex flex-wrap gap-2">
-                  <Button type="button" variant="outline" onClick={handleSubmitOne}>
-                    Submit report
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleSubmitOne}
+                    disabled={submitting}
+                  >
+                    {submitting ? "Submitting..." : "Submit report"}
                   </Button>
-                  <Button type="button" onClick={analyze} disabled={submitted.length === 0}>
-                    <Activity className="h-4 w-4" />
-                    Run consensus
+                  <Button
+                    type="button"
+                    onClick={analyze}
+                    disabled={submitted.length === 0 || finalizing}
+                  >
+                    {finalizing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Activity className="h-4 w-4" />
+                    )}
+                    {finalizing ? "Finalizing..." : "Run consensus"}
                   </Button>
                 </div>
               </DialogFooter>
+              {blockchainEnabled && txMessage && (
+                <p className="text-xs text-muted-foreground">{txMessage}</p>
+              )}
             </motion.div>
           )}
 
@@ -398,7 +456,8 @@ export function SimulateReportModal({
                 </div>
                 <div className="rounded-lg border border-border p-3">
                   <dt className="flex items-center gap-2 text-muted-foreground">
-                    <ShieldCheck className="h-4 w-4 text-primary" /> Simulated chain confirmation
+                    <ShieldCheck className="h-4 w-4 text-primary" />
+                    {blockchainEnabled ? "Chain confirmation" : "Simulated chain confirmation"}
                   </dt>
                   <dd className="mt-2">
                     <CopyHash hash={result.hash} label={`Event ${result.outageId}`} />

@@ -27,7 +27,7 @@ export function ConfirmModal({
   description: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   children?: ReactNode;
 }) {
   return (
